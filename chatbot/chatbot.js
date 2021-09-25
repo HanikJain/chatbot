@@ -40,12 +40,18 @@ module.exports ={
                 }
             }
           };
+          try {
+            let responses = await sessionClient.detectIntent(request);
+            const result = responses[0].queryResult;
+            
+            responses = await this.handleAction(responses);
+            return responses;
+
+          } catch (error) {
+              return error;
+          }
          
-        let responses = await sessionClient.detectIntent(request);
-        const result = responses[0].queryResult;
-        
-        responses = await this.handleAction(responses);
-        return responses;
+       
 
     },
     eventQuery: async function(event, paramaters = {}) {
