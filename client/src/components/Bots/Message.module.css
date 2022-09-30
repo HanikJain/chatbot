@@ -1,0 +1,20 @@
+.messageContainer{
+    width:80%;
+    padding: 5% 5%;
+    margin: 1rem;
+}
+
+.messageContainerBot{
+    border-radius: 0.6rem;
+    border-top-left-radius: 0.01rem;
+    background-color: #0066ff;
+    color: #fff;
+}
+
+.messageContainerYou{
+    border-radius: 0.6rem;
+    border-bottom-right-radius: 0.1rem;
+    background-color: #0066ff;
+    color: #fff;
+
+}
