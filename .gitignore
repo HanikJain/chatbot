@@ -1,3 +1,9 @@
-node_modules
+/node_modules
 .idea
+.env
+
+reactpageagent-eheb-6abe1c690cc3.json
+
+
+/client/node_modules
 

@@ -1,27 +1,34 @@
 import React from 'react'
 import styles from './Message.module.css';
-import { ChatItem } from 'react-chat-elements'
+import { ChatItem, MessageBox } from 'react-chat-elements'
+
 // RCE CSS
 import 'react-chat-elements/dist/main.css';
 
 export default function Message(props) {
-    if(props.speaks === "BOT"){
+    if (props.speaks === "BOT") {
         return (
             // <div className={`${styles.messageContainer} ${styles.messageContainerBot}`}>
-                <ChatItem
+
+            <ChatItem
                 avatar={'https://cdn3.vectorstock.com/i/1000x1000/38/17/chat-bot-icon-outline-robot-sign-in-blue-circle-vector-18943817.jpg'}
-                avatarFlexible = {true}
+                avatarFlexible={true}
                 alt={'Bot'}
                 title={'Chatbot'}
                 subtitle={props.text}
                 date={new Date()}
-                unread={0} 
-                onClick={false}/>
-               // {/* {props.text}
+                unread={0}
+                onClick={false} />
+
+            // {/* {props.text}
             // </div> */}
+
+
+
+
         );
-    } else if(props.speaks === "ME"){
-    return (
+    } else if (props.speaks === "ME") {
+        return (
             <ChatItem
                 avatar={'https://cdn3.vectorstock.com/i/1000x1000/38/17/chat-bot-icon-outline-robot-sign-in-blue-circle-vector-18943817.jpg'}
                 alt={'User'}
@@ -29,11 +36,11 @@ export default function Message(props) {
                 subtitle={props.text}
                 date={new Date()}
                 unread={0} />
-        // <div className={`${styles.messageContainer} ${styles.messageContainerYou}`}>
-        //     {props.text}
-        // </div>
-        
-    )
+            // <div className={`${styles.messageContainer} ${styles.messageContainerYou}`}>
+            //     {props.text}
+            // </div>
+
+        )
     } else {
         return (<p>Something went wrong</p>);
     }

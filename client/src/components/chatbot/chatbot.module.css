@@ -1,0 +1,8 @@
+.inputBox {
+    position: absolute;
+    top: 460px;
+    width: 90% !important;
+    margin: auto !important;
+    padding: 1rem !important;
+    box-sizing: border-box !important;
+}
