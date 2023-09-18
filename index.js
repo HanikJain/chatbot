@@ -8,6 +8,8 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 app.use(bodyParser.json());
+
+
 PORT = process.env.PORT || 5000;
 
 mongoose.connect("mongodb://0.0.0.0:27017/chatbotDB")
@@ -21,3 +23,4 @@ mongoose.connect("mongodb://0.0.0.0:27017/chatbotDB")
     })
 
 require('./routes/dialogFlowRoutes')(app);
+require('./routes/analyticsRoutes')(app);

@@ -1,0 +1,13 @@
+.cardContainer {
+    width: 60%;
+    margin: 0.5rem 0;
+}
+
+.optionList {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-top: 0;
+}

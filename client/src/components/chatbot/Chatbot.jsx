@@ -1,19 +1,31 @@
 import React, { Fragment, useState, useEffect, useRef } from 'react';
+import { useSelector, useDispatch } from "react-redux";
+
 import axios from 'axios/index';
 import Cookies from "universal-cookie";
 import { v4 as uuid } from 'uuid';
 import messageComponent from "./messageComponent";
 import "./Chatbot.css"
 import styles from "./chatbot.module.css"
+import useHttp from "../../hooks/use-http";
+import { dataActions } from "../../store/data"
+import createMsgStructure from "./createMsgStructure";
 
 const cookies = new Cookies();
 
 
-export default function Chatbot() {
-    const [messages, setMessages] = useState([]);
-    const [sendRequest, setSendRequest] = useState({ request: false, text: '' });
-    const scrollDiv = useRef();
 
+export default function Chatbot() {
+
+    const messages = useSelector((state) => state.data.messages);
+    const dispatch = useDispatch();
+
+    const [request, setRequest] = useState({ request: false, text: '' });
+    const { isLoading, error, sendRequest } = useHttp();
+    const scrollDiv = useRef();
+    const [startTime, setStartTime] = useState();
+    const [finalTime, setFinalTime] = useState();
+    // console.log(startTime);
 
     // Startup message
     useEffect(() => {
@@ -21,14 +33,10 @@ export default function Chatbot() {
 
             const res = await axios.post('/api/df_event_query', { event })
 
+            for (let msg of res.data.responses[0].queryResult.fulfillmentMessages) {
+                const says = createMsgStructure('BOT', 'TEXT', { text: msg.text.text })
+                dispatch(dataActions.setRenderMessage(says));
 
-            for (let msg of res.data[0].queryResult.fulfillmentMessages) {
-                msg['type'] = "TEXT";
-                let says = {
-                    speaks: 'ME',
-                    msg: msg
-                }
-                setMessages(prevState => [...prevState, says]);
             }
         }
 
@@ -37,88 +45,83 @@ export default function Chatbot() {
         }
 
         df_event_query("Welcome");
+        setStartTime(Date.now());
 
-    }, [])
+    }, [setStartTime]);
 
 
     // message send
     useEffect(() => {
 
-        async function df_text_query(text) {
-            let says = {
-                speaks: "ME",
-                msg: {
-                    text: {
+        if (request.request) {
+            const text = request.text;
+            const says = createMsgStructure('ME', 'TEXT', { text: text })
+            dispatch(dataActions.setRenderMessage(says));
+
+            async function requestHandler() {
+                const config = {
+                    url: "/api/text_query",
+                    method: "POST",
+                    body: {
                         text: text
-                    },
-                    type: "TEXT"
+                    }
                 }
-            };
+                const response = await sendRequest(config);
 
-            setMessages(prevState => [...prevState, says]);
-
-
-            const response = await axios.post('/api/text_query', { text })
-            const data = response.data.responses;
-
-
-            if (response.data.intentExits) {
-                if (data.length !== 0) {
-                    let res = data[0].data;
-                    let newData = ""
-                    if (data[0].type === 'CARD') {
-                        newData = `
-                        Name: ${res.name}
-                        Description: ${res.description}
-                        Price: ${res.price}/-
-                        Rating: ${res.rating}
-                        `
-                    } else {
-                        newData = res.text;
-                    }
-
-                    let msg = { text: { text: newData }, type: data[0].type };
-                    let says = {
-                        speaks: 'BOT',
-                        msg: msg
-                    }
-
-                    setMessages(prevState => [...prevState, says]);
-
+                if (response === undefined) {
+                    const says = createMsgStructure('BOT', 'TEXT', { text: "Something went wrong!" })
+                    dispatch(dataActions.setRenderMessage(says));
                 } else {
-                    let d = { text: { text: "No course found" }, type: 'TEXT' };
+                    const data = response.responses;
+                    const intentExits = response.intentExits;
 
-                    let says = {
-                        speaks: 'BOT',
-                        msg: d
+                    if (intentExits) {
+                        if (data.length !== 0) {
+                            for (let value of data) {
+                                const says = createMsgStructure('BOT', value.type, value.data)
+                                dispatch(dataActions.setRenderMessage(says));
+                            }
+
+                        } else {
+                            const data = { text: "No course found" }
+                            const says = createMsgStructure('BOT', 'TEXT', data)
+                            dispatch(dataActions.setRenderMessage(says));
+                        }
+
                     }
-
-                    setMessages(prevState => [...prevState, says]);
+                    else {
+                        for (let msg of data[0].queryResult.fulfillmentMessages) {
+                            const data = { text: msg.text.text };
+                            const says = createMsgStructure('BOT', 'TEXT', data)
+                            dispatch(dataActions.setRenderMessage(says));
+                        }
+                    }
                 }
 
-            }
-            else {
+                setRequest({ request: false, text: "" });
 
-                for (let msg of data[0].queryResult.fulfillmentMessages) {
-                    let d = { text: { text: msg.text.text }, type: 'TEXT' };
-
-                    let says = {
-                        speaks: 'BOT',
-                        msg: d
-                    }
-
-                    setMessages(prevState => [...prevState, says]);
-                }
             }
 
-            setSendRequest({ request: false, text: "" });
-
+            requestHandler();
         }
 
-        if (sendRequest.request)
-            df_text_query(sendRequest.text);
+    }, [request, sendRequest])
 
-    }, [sendRequest])
+
+    // calculate interaction time
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            let inter_time = Math.floor((Date.now() - startTime) / 1000) - 10;
+            console.log(inter_time);
+
+        }, 1000 * 10);
+
+        return () => {
+            clearTimeout(timer);
+        }
+
+    }, [request, startTime])
+
 
 
     // scroll to bottom when compnents updated
@@ -130,7 +133,7 @@ export default function Chatbot() {
     // Executes when user click on "Enter"
     function handleInputKeyPress(e) {
         if (e.key === 'Enter' && e.target.value !== '') {
-            setSendRequest({ request: true, text: e.target.value });
+            setRequest({ request: true, text: e.target.value });
             e.target.value = '';
         }
 
@@ -162,8 +165,8 @@ export default function Chatbot() {
             <div className="wrapper">
                 <div className="head-text">
                     <span> Chatbot </span>
-                    <input type="checkbox" id="clicked" />
-                    <label for="clicked"><i className="fas fa-times"></i></label>
+                    {/* <input type="checkbox" id="clicked" />
+                    <label for="clicked"><i className="fas fa-times"></i></label> */}
                 </div>
                 <div className="chat-box">
                     <div style={{ height: 400, width: 400 }}>

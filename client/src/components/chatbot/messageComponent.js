@@ -1,5 +1,6 @@
 import Message from "../UI/Message"
-import Card from "../UI/Card"
+import CardComponent from "../UI/Card"
+import OptionComponent from "../UI/OptionComponent.jsx"
 
 export default function messageComponent(props) {
     const [type, message, i] = props;
@@ -7,10 +8,13 @@ export default function messageComponent(props) {
     switch (type) {
 
         case "TEXT":
-            return <Message key={i} speaks={message.speaks} text={message.msg.text.text} />
+            return <Message key={i} speaks={message.speaks} data={message.msg.data} />
 
         case "CARD":
-            return <Card key={i} text={message.msg.text.text} />
+            return <CardComponent key={i} data={message.msg.data} />
+
+        case "OPTION":
+            return <OptionComponent key={i} data={message.msg.data} />    
 
         default:
             break;

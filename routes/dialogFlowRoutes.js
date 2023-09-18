@@ -1,5 +1,11 @@
+const fs = require('fs');
+
 const chatbot = require("../chatbot/chatbot");
 const courses = require("../models/courses");
+const analytics = require("../models/analytics");
+const textQuery = require("../controllers/textQuery")
+const options = require("../controllers/options");
+
 
 module.exports = (app) => {
   app.get("/", (req, res) => {
@@ -7,50 +13,42 @@ module.exports = (app) => {
   });
 
   app.post("/api/df_text_query", async (req, res) => {
-    let responses = await chatbot.textQuery(req.body.text, req.body.paramaters);
+    const responses = await chatbot.textQuery(req.body.text, req.body.paramaters);
 
     res.send(responses);
   });
 
   app.post("/api/df_event_query", async (req, res) => {
-    let responses = await chatbot.eventQuery(
-      req.body.event,
-      req.body.paramaters
-    );
-    res.send(responses);
+
+    try {
+      const responses = await chatbot.eventQuery(
+        req.body.event,
+        req.body.paramaters
+      );
+
+        try {
+          
+          await analytics.updateOne({id: 1}, {$inc: {interaction_count: 1}});
+
+        } catch (error) {
+            console.log(error, "Error in mongoDB");
+        }
+      
+        console.log(responses, "response")
+        res.send({
+          responses:responses,
+          api: "/api/text_query",
+        });
+      
+    } catch (error) {
+        console.log(error, "error");
+    }
+
+   
   });
 
   //
-  app.post("/api/text_query", async (req, res) => {
-    let responses = await chatbot.textQuery(req.body.text, req.body.paramaters);
+  app.post("/api/text_query", textQuery);
 
-    if (
-      responses[0].queryResult.intent.displayName === "Default Fallback Intent"
-    ) {
-      res.send({
-        responses: responses,
-        intentExits: false,
-      });
-    } else {
-      const keyword =
-        responses[0].queryResult.parameters.fields.course.stringValue;
-
-      courses
-        .find({
-          keyword: keyword,
-        }, {
-          _id: 1,
-          data: 1,
-          type: 1,
-        })
-        .then((result) => {
-          console.log(result);
-          res.send({
-            responses: result,
-            intentExits: true,
-          });
-        })
-        .catch((err) => console.log(err, "Error fetching courses"));
-    }
-  });
+  app.post("/api/options", options);
 };

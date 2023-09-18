@@ -1,8 +1,13 @@
 .inputBox {
     position: absolute;
-    top: 460px;
+    top: 452px;
     width: 90% !important;
     margin: auto !important;
     padding: 1rem !important;
     box-sizing: border-box !important;
+    border: none;
+}
+
+.inputBox:focus {
+    outline: none;
 }

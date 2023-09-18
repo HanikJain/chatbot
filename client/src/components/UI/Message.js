@@ -8,23 +8,17 @@ import 'react-chat-elements/dist/main.css';
 export default function Message(props) {
     if (props.speaks === "BOT") {
         return (
-            // <div className={`${styles.messageContainer} ${styles.messageContainerBot}`}>
+
 
             <ChatItem
                 avatar={'https://cdn3.vectorstock.com/i/1000x1000/38/17/chat-bot-icon-outline-robot-sign-in-blue-circle-vector-18943817.jpg'}
                 avatarFlexible={true}
                 alt={'Bot'}
                 title={'Chatbot'}
-                subtitle={props.text}
+                subtitle={props.data.text}
                 date={new Date()}
                 unread={0}
                 onClick={false} />
-
-            // {/* {props.text}
-            // </div> */}
-
-
-
 
         );
     } else if (props.speaks === "ME") {
@@ -33,12 +27,9 @@ export default function Message(props) {
                 avatar={'https://cdn3.vectorstock.com/i/1000x1000/38/17/chat-bot-icon-outline-robot-sign-in-blue-circle-vector-18943817.jpg'}
                 alt={'User'}
                 title={'You'}
-                subtitle={props.text}
+                subtitle={props.data.text}
                 date={new Date()}
                 unread={0} />
-            // <div className={`${styles.messageContainer} ${styles.messageContainerYou}`}>
-            //     {props.text}
-            // </div>
 
         )
     } else {
