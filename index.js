@@ -1,3 +1,4 @@
+require('dotenv').config()
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose')
@@ -12,7 +13,7 @@ app.use(bodyParser.json());
 
 PORT = process.env.PORT || 5000;
 
-mongoose.connect("mongodb://0.0.0.0:27017/chatbotDB")
+mongoose.connect(process.env.DATABASE_URL)
     .then(result => {
         app.listen(PORT, function () {
             console.log(`listening on port ${PORT}`);

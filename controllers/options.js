@@ -4,7 +4,7 @@ function findData(id, data) {
     const arrID = id.split('.');
      
     if(arrID.length === 1) {
-        const cloneData = structuredClone(data);
+        const cloneData = JSON.parse(JSON.stringify(data));
         return cloneData;       
     }
     else {
@@ -27,7 +27,7 @@ async function options(req, res, next) {
             const title = req.body.title;
             const obj = JSON.parse(data)
             const response = findData(id, obj.data[0].data);
-            const clonedResponse = structuredClone(response);
+            const clonedResponse = JSON.parse(JSON.stringify(response));
             clonedResponse.title = title;
 
             res.status(201).json({
